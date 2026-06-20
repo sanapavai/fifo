@@ -1,0 +1,79 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date: 19.06.2026 18:12:29
+-- Design Name: 
+-- Module Name: fifo - Behavioral
+-- Project Name: 
+-- Target Devices: 
+-- Tool Versions: 
+-- Description: 
+-- 
+-- Dependencies: 
+-- 
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+-- 
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity fifo is
+Port (clk, rst : in std_logic;
+data_in : std_logic_vector(7 downto 0);
+wr, re : in std_logic;
+data_out : out std_logic_vector(7 downto 0) );
+end fifo;
+
+architecture Behavioral of fifo is
+signal full , empty :  std_logic;
+signal wr_pt , re_pt : integer  range 0 to 15 ;
+signal count : integer range 0 to 16;
+type mem_type is array  (0 to 15 ) of std_logic_vector(7 downto 0);
+signal mem : mem_type ;
+signal reg : std_logic_vector(7 downto 0 );
+begin
+full  <= '1' when count = 16 else '0';
+empty <= '1' when count = 0 else '0';
+data_out<=reg;
+process(clk,rst)
+begin 
+if rst='1' then 
+wr_pt<=0;
+re_pt <=0;
+count<=0;
+reg <=(others=>'0');
+elsif rising_edge(clk) then 
+if (wr='1' and full ='0') then 
+mem(wr_pt)<=data_in;
+if wr_pt =15 then 
+wr_pt<=0;
+else 
+wr_pt<=wr_pt+1;
+end if ;
+count<=count+1;
+elsif ( re='1' and empty ='0')then 
+reg <=mem(re_pt);
+if re_pt =15 then 
+re_pt <=0;
+else 
+re_pt<=re_pt+1;
+end if ;
+count<=count-1;
+end if ;
+end if ;
+end process;
+end Behavioral;
