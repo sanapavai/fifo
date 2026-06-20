@@ -1,0 +1,18 @@
+FIFO Design (Verilog + VHDL)
+
+This project implements a Synchronous FIFO (First-In First-Out) memory using both Verilog and VHDL.
+
+📌 Description
+
+FIFO is used to store data temporarily and ensures data is read in the same order it is written (First In, First Out).
+
+⚙️ Features
+Parameterized FIFO (data width & depth)
+Write and Read operations
+Full and Empty flag generation
+Pointer-based memory access
+Count-based tracking
+📂 Files
+Verilog implementation
+VHDL implementation
+Testbench files
