@@ -1,0 +1,72 @@
+`timescale 1ns / 1ps
+
+module FIFO #(
+    parameter data_width = 8,
+    parameter data_depth = 16,
+    parameter data_addr  = $clog2(data_depth)
+)(
+    input clk,
+    input reset,
+    input we,
+    input re,
+    input [data_width-1:0] data_in,
+    output reg [data_width-1:0] data_out,
+    output full,
+    output empty
+);
+
+reg [data_width-1:0] mem [0:data_depth-1];
+reg [data_addr-1:0] wr_ptr;
+reg [data_addr-1:0] re_ptr;
+reg [data_addr:0] count;
+
+// WRITE
+always @(posedge clk) begin
+    if (!reset)
+        wr_ptr <= 0;
+
+    else if (we && !full) begin
+        mem[wr_ptr] <= data_in;
+
+        if (wr_ptr == data_depth - 1)
+            wr_ptr <= 0;
+        else
+            wr_ptr <= wr_ptr + 1;
+    end
+end
+
+// READ
+always @(posedge clk) begin
+    if (!reset) begin
+        re_ptr <= 0;
+        data_out <= 0;
+    end
+
+    else if (re && !empty) begin
+        data_out <= mem[re_ptr];
+
+        if (re_ptr == data_depth - 1)
+            re_ptr <= 0;
+        else
+            re_ptr <= re_ptr + 1;
+    end
+end
+
+// COUNT (VERY IMPORTANT FIX)
+always @(posedge clk) begin
+    if (!reset)
+        count <= 0;
+
+    else begin
+        case ({re && !empty, we && !full})
+            2'b01: count <= count + 1; // write
+            2'b10: count <= count - 1; // read
+            default: count <= count;   // no change
+        endcase
+    end
+end
+
+assign full  = (count == data_depth);
+assign empty = (count == 0);
+
+endmodule
